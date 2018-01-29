@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'inventory';
+
+    protected $fillable = ['survivor_id', 'item_id', 'qtd'];
 
     public function survivor()
     {
@@ -17,5 +21,5 @@ class Inventory extends Model
     {
         return $this->hasMany('App\Item');
     }
-    
+
 }
