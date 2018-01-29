@@ -15,7 +15,7 @@ class CreateSurvivorsTable extends Migration
     {
         Schema::create('survivors', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('name')->unique();
             $table->integer('age');
             $table->string('gender');
             $table->string('lat');
