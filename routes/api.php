@@ -21,5 +21,6 @@ Route::prefix('survivor')->group(function () {
 
     Route::post('/new', 'SurvivorController@store');
     Route::put('/{id}/location/update', 'SurvivorController@updateLocation');
-    
+    Route::post('/{id}/related', 'SurvivorController@flagSurvivorInfected');
+       
 });
