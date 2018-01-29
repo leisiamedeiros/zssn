@@ -20,5 +20,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('survivor')->group(function () {
 
     Route::post('/new', 'SurvivorController@store');
-
+    Route::put('/{id}/location/update', 'SurvivorController@updateLocation');
+    
 });

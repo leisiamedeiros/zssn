@@ -53,5 +53,25 @@ class SurvivorController extends Controller
 
     }
 
+    public function updateLocation(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'lat' => 'required|string',
+            'long' => 'required|string'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        try {
+          $updated = Survivor::findOrFail($id)->update([
+            'lat' => $request->lat,
+            'long' => $request->long
+          ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ops.. survivor not found'], 404);
+        }
+        return response()->json(['message' => $updated], 200);
+    }
 }
