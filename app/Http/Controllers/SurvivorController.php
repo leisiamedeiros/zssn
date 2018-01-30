@@ -7,6 +7,7 @@ use App\Survivor;
 use App\Infected;
 use Validator;
 use App\Rules\Items;
+use App\Item;
 use App\Inventory;
 
 class SurvivorController extends Controller
@@ -121,20 +122,20 @@ class SurvivorController extends Controller
 
     public function tradeItems(Request $request, $id)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'owner_name' => 'required|string',
-        //     'items_wanted' => ['required', new Items],
-        //     'items_paid' => ['required', new Items]
-        // ]);
-        //
-        // if ($validator->fails()) {
-        //     return response()->json($validator->errors(), 422);
-        // }
+        $validator = Validator::make($request->all(), [
+            'owner_name' => 'required|string',
+            'items_wanted' => ['required', new Items],
+            'items_paid' => ['required', new Items]
+        ]);
 
-        $interessed = Survivor::with('inventory')->with('infected')
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $interessed = Survivor::with(['inventory.item', 'infected'])
                      ->whereId($id)->first();
 
-        $owner = Survivor::with('inventory')->with('infected')
+        $owner = Survivor::with(['inventory.item', 'infected'])
                      ->whereName($request->owner_name)->first();
 
         if ( empty($interessed) || empty($owner) ) {
@@ -145,7 +146,32 @@ class SurvivorController extends Controller
         }
 
         if (is_null($owner->infected) && is_null($interessed->infected)) {
-            return "Os 2 estão ok pra negociar";
+
+
+
+            $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->inventory);
+            $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->inventory);
+
+            if ($resultI == false || $resultO == false) {
+              return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+            }
+
+            $cPinteressed = $this->countPoints($request->items_paid);
+            $cPowner = $this->countPoints($request->items_wanted);
+
+            if ( array_sum($cPinteressed) ===  array_sum($cPowner) ) {
+              // mesma quaantidade de pontos, substituir os items
+              return 'OK';
+
+            } else {
+
+              return response()->json([
+                'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
+              ], 403);
+            }
+
+
+
 
         } else if ( !is_null($owner->infected) && !is_null($interessed->infected) ) {
             if ( $owner->infected->status === true || $interessed->infected->status === true ) {
@@ -172,4 +198,33 @@ class SurvivorController extends Controller
 
         return response()->json(['message' => 'Ops... something is wrong'], 403);
     }
+
+    public function verifyItemsInventory($items, $inventory)
+    {
+        $itemsS = explode(",", $items);
+        foreach ($itemsS as $i) {
+            list($Id[], $Qtty[]) = explode(":", $i);
+        }
+        foreach ($inventory as $inv) {
+            $iInventory[] = $inv->item_id;
+        }
+        foreach ($Id as $key => $value) {
+          if (!in_array($value, $iInventory)) {
+            return false;
+          }
+        }
+        return true;
+    }
+
+    public function countPoints($items)
+    {
+        $itemsS = explode(",", $items);
+        foreach ($itemsS as $i) {
+            list($Id, $Qtty) = explode(":", $i);
+            $IPoint = Item::countPoints($Id);
+            $points[] = $IPoint * $Qtty;
+        }
+        return $points;
+    }
+
 }

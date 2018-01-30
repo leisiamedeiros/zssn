@@ -17,9 +17,9 @@ class Inventory extends Model
         return $this->belongsTo('App\Survivor');
     }
 
-    public function items()
+    public function item()
     {
-        return $this->hasMany('App\Item');
+        return $this->hasOne('App\Item', 'id', 'item_id');
     }
 
 }
