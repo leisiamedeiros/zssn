@@ -148,9 +148,8 @@ class SurvivorController extends Controller
         if (is_null($owner->infected) && is_null($interessed->infected)) {
 
 
-
-            $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->inventory);
-            $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->inventory);
+            $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->id);
+            $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
             if ($resultI == false || $resultO == false) {
               return response()->json(['message' => 'Oops... you havent one or more items'], 404);
@@ -169,7 +168,6 @@ class SurvivorController extends Controller
                 'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
               ], 403);
             }
-
 
 
 
@@ -199,19 +197,15 @@ class SurvivorController extends Controller
         return response()->json(['message' => 'Ops... something is wrong'], 403);
     }
 
-    public function verifyItemsInventory($items, $inventory)
+    public function verifyItemsInventory($items, $id)
     {
         $itemsS = explode(",", $items);
         foreach ($itemsS as $i) {
-            list($Id[], $Qtty[]) = explode(":", $i);
-        }
-        foreach ($inventory as $inv) {
-            $iInventory[] = $inv->item_id;
-        }
-        foreach ($Id as $key => $value) {
-          if (!in_array($value, $iInventory)) {
-            return false;
-          }
+            list($IdItem, $Qtty) = explode(":", $i);
+            $count = Inventory::verifyItem($id, $IdItem, $Qtty);
+            if ($count == 0) {
+              return false;
+            }
         }
         return true;
     }
