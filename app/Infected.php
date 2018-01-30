@@ -25,6 +25,11 @@ class Infected extends Model
         return $query->whereSurvivorId($id)->count();
     }
 
+    public function scopeInfected($query, $id)
+    {
+        return $query->select('status')->where('survivor_id', $id)->groupBy('status');
+    }
+
     public function survivor()
     {
        return $this->belongsTo('App\Survivor');

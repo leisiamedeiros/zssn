@@ -119,4 +119,57 @@ class SurvivorController extends Controller
         return response()->json(['message' => $reported], 200);
     }
 
+    public function tradeItems(Request $request, $id)
+    {
+        // $validator = Validator::make($request->all(), [
+        //     'owner_name' => 'required|string',
+        //     'items_wanted' => ['required', new Items],
+        //     'items_paid' => ['required', new Items]
+        // ]);
+        //
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $interessed = Survivor::with('inventory')->with('infected')
+                     ->whereId($id)->first();
+
+        $owner = Survivor::with('inventory')->with('infected')
+                     ->whereName($request->owner_name)->first();
+
+        if ( empty($interessed) || empty($owner) ) {
+            return response()->json(['message' => 'Ops... survivor not found'], 404);
+        }
+        if ($interessed->id === $owner->id) {
+            return response()->json(['message' => 'Ops... you cant trade items with yourself'], 403);
+        }
+
+        if (is_null($owner->infected) && is_null($interessed->infected)) {
+            return "Os 2 estão ok pra negociar";
+
+        } else if ( !is_null($owner->infected) && !is_null($interessed->infected) ) {
+            if ( $owner->infected->status === true || $interessed->infected->status === true ) {
+                return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
+            } else {
+                return "ff Podem negociar";
+            }
+        } else if ( is_null($owner->infected) ) {
+
+            if ( $interessed->infected->status === false) {
+              return "Podem negociar";
+            } else {
+              return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
+            }
+
+        } else {
+
+            if ( $owner->infected->status === false) {
+              return "Podem negociar";
+            } else {
+              return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
+            }
+        }
+
+        return response()->json(['message' => 'Ops... something is wrong'], 403);
+    }
 }
