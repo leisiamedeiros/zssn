@@ -16,8 +16,8 @@ These steps are for the initial setup of the project, if all goes well you can b
 
 Routes and parameters example:
 
-`/api/survivor/new`
-> {
+`POST /api/survivor/new`
+* {
 	"name": "survivor name",
 	"age": 28,
 	"gender": "type",
@@ -26,18 +26,22 @@ Routes and parameters example:
 	"items": "idItem:quantity, idItem:quantity"
 }
 
-`/api/survivor/{my_id}/location/update`
-> { "lat": "-1088444",	"long": "1244533" }
+`PUT /api/survivor/{my_id}/location/update`
+* { "lat": "-1088444",	"long": "1244533" }
 
-`/api/survivor/{my_id}/report`
-> { "survivor_id": 1 } --->>> the id of the survivor you want to report
+`POST /api/survivor/{my_id}/report`
+* { "survivor_id": 1 } --->>> the id of the survivor you want to report
 
-`/api/survivor/{my_id}/trade`
-> {
+`POST /api/survivor/{my_id}/trade`
+* {
 	"owner_name" : "survivor name",
 	"items_wanted" : "idItem:quantity",
 	"items_paid" : "idItem:quantity"
 }
+
+`GET /api/report/infected`
+
+`GET /api/report/non-infected`
 
 #### The product identifier (id) must respect the following table
 
