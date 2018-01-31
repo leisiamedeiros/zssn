@@ -28,14 +28,14 @@ class Inventory extends Model
         $this->save();
     }
 
-    // public function scopeGetInventory($query, $id, $item_id, $qtty)
-    // {
-    //     return $query->where([
-    //         ['survivor_id', '=', $id],
-    //         ['item_id', '=', $item_id],
-    //         ['qtd', '=', $qtty],
-    //       ])->first();
-    // }
+    public function scopeGetInventory($query, $id, $item_id, $qtty)
+    {
+        return $query->where([
+            ['survivor_id', '=', $id],
+            ['item_id', '=', $item_id],
+            ['qtd', '>=', $qtty],
+          ])->first();
+    }
 
     public function scopeVerifyItem($query, $id, $item_id, $qtty)
     {

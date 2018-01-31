@@ -147,7 +147,6 @@ class SurvivorController extends Controller
 
         if (is_null($owner->infected) && is_null($interessed->infected)) {
 
-
             $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->id);
             $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
@@ -159,41 +158,96 @@ class SurvivorController extends Controller
             $cPowner = $this->countPoints($request->items_wanted);
 
             if ( array_sum($cPinteressed) ===  array_sum($cPowner) ) {
-              // mesma quaantidade de pontos, substituir os items
-              return 'OK';
+              $this->replaceItems($request->items_paid, $interessed->id, $request->items_wanted, $owner->id);
+              return response()->json(['message' => 'OK'], 200);
 
             } else {
-
               return response()->json([
                 'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
               ], 403);
             }
 
-
-
         } else if ( !is_null($owner->infected) && !is_null($interessed->infected) ) {
             if ( $owner->infected->status === true || $interessed->infected->status === true ) {
                 return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
             } else {
-                return "ff Podem negociar";
-            }
-        } else if ( is_null($owner->infected) ) {
 
+              $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->id);
+              $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
+
+              if ($resultI == false || $resultO == false) {
+                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+              }
+
+              $cPinteressed = $this->countPoints($request->items_paid);
+              $cPowner = $this->countPoints($request->items_wanted);
+
+              if ( array_sum($cPinteressed) ===  array_sum($cPowner) ) {
+                $this->replaceItems($request->items_paid, $interessed->id, $request->items_wanted, $owner->id);
+                return response()->json(['message' => 'OK'], 200);
+
+              } else {
+                return response()->json([
+                  'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
+                ], 403);
+              }
+
+            }
+
+        } else if ( is_null($owner->infected) ) {
             if ( $interessed->infected->status === false) {
-              return "Podem negociar";
+
+              $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->id);
+              $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
+
+              if ($resultI == false || $resultO == false) {
+                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+              }
+
+              $cPinteressed = $this->countPoints($request->items_paid);
+              $cPowner = $this->countPoints($request->items_wanted);
+
+              if ( array_sum($cPinteressed) ===  array_sum($cPowner) ) {
+                $this->replaceItems($request->items_paid, $interessed->id, $request->items_wanted, $owner->id);
+                return response()->json(['message' => 'OK'], 200);
+
+              } else {
+                return response()->json([
+                  'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
+                ], 403);
+              }
+
             } else {
               return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
             }
 
         } else {
-
             if ( $owner->infected->status === false) {
-              return "Podem negociar";
+
+              $resultI = $this->verifyItemsInventory($request->items_paid, $interessed->id);
+              $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
+
+              if ($resultI == false || $resultO == false) {
+                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+              }
+
+              $cPinteressed = $this->countPoints($request->items_paid);
+              $cPowner = $this->countPoints($request->items_wanted);
+
+              if ( array_sum($cPinteressed) ===  array_sum($cPowner) ) {
+                $this->replaceItems($request->items_paid, $interessed->id, $request->items_wanted, $owner->id);
+                return response()->json(['message' => 'OK'], 200);
+
+              } else {
+                return response()->json([
+                  'message' => 'Oops... Both sides of the trade should offer the same amount of points.'
+                ], 403);
+              }
+
             } else {
               return response()->json(['message' => 'Ops... kinda dead cant trade items'], 403);
             }
         }
-
         return response()->json(['message' => 'Ops... something is wrong'], 403);
     }
 
@@ -219,6 +273,66 @@ class SurvivorController extends Controller
             $points[] = $IPoint * $Qtty;
         }
         return $points;
+    }
+
+    public function replaceItems($items_paid, $interessed_id, $items_wanted, $owner_id)
+    {
+        $itemsPayment = explode(",", $items_paid);
+        foreach ($itemsPayment as $i) {
+
+            list($Id_Item, $Qtty_I) = explode(":", $i);
+            $itemChangeIn = Inventory::getInventory($interessed_id, $Id_Item, $Qtty_I);
+
+            if ( $itemChangeIn->qtd > $Qtty_I) {
+              $itemChangeIn->qtd -= $Qtty_I;
+              $itemChangeIn->save();
+
+              $ownerInventory = Inventory::whereSurvivorId($owner_id)->whereItemId($itemChangeIn->item_id)->first();
+              if (empty($ownerInventory)) {
+                Inventory::create([
+                  'survivor_id' => $owner_id,
+                  'item_id' => $itemChangeIn->item_id,
+                  'qtd' => $Qtty_I
+                ]);
+              } else {
+                $ownerInventory->qtd += $Qtty_I;
+                $ownerInventory->save();
+              }
+
+            } else {
+              $itemChangeIn->survivor_id = $owner_id;
+              $itemChangeIn->save();
+            }
+        }
+
+        $itemsWanted = explode(",", $items_wanted);
+        foreach ($itemsWanted as $i) {
+
+            list($id_item_wanted, $qtty_wanted) = explode(":", $i);
+            $itemChangeOW = Inventory::getInventory($owner_id, $id_item_wanted, $qtty_wanted);
+
+            if ( $itemChangeOW->qtd > $qtty_wanted) {
+              $itemChangeOW->qtd -= $qtty_wanted;
+              $itemChangeOW->save();
+
+              $InteressedInventory = Inventory::whereSurvivorId($interessed_id)->whereItemId($itemChangeOW->item_id)->first();
+              if (empty($InteressedInventory)) {
+                Inventory::create([
+                  'survivor_id' => $interessed_id,
+                  'item_id' => $itemChangeOW->item_id,
+                  'qtd' => $qtty_wanted
+                ]);
+              } else {
+                $InteressedInventory->qtd += $qtty_wanted;
+                $InteressedInventory->save();
+              }
+
+            } else {
+              $itemChangeOW->survivor_id = $interessed_id;
+              $itemChangeOW->save();
+            }
+        }
+
     }
 
 }
