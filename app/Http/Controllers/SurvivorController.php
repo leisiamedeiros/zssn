@@ -151,7 +151,7 @@ class SurvivorController extends Controller
             $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
             if ($resultI == false || $resultO == false) {
-              return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+              return response()->json(['message' => 'Oops... you dont have one or more items'], 404);
             }
 
             $cPinteressed = $this->countPoints($request->items_paid);
@@ -176,7 +176,7 @@ class SurvivorController extends Controller
               $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
               if ($resultI == false || $resultO == false) {
-                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+                return response()->json(['message' => 'Oops... you dont have one or more items'], 404);
               }
 
               $cPinteressed = $this->countPoints($request->items_paid);
@@ -201,7 +201,7 @@ class SurvivorController extends Controller
               $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
               if ($resultI == false || $resultO == false) {
-                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+                return response()->json(['message' => 'Oops... you dont have one or more items'], 404);
               }
 
               $cPinteressed = $this->countPoints($request->items_paid);
@@ -228,7 +228,7 @@ class SurvivorController extends Controller
               $resultO = $this->verifyItemsInventory($request->items_wanted, $owner->id);
 
               if ($resultI == false || $resultO == false) {
-                return response()->json(['message' => 'Oops... you havent one or more items'], 404);
+                return response()->json(['message' => 'Oops... you dont have one or more items'], 404);
               }
 
               $cPinteressed = $this->countPoints($request->items_paid);
