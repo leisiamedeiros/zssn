@@ -19,11 +19,17 @@ class Survivor extends Model
 
     public function inventory()
     {
-        return $this->hasOne('App\Inventory');
+        return $this->hasMany('App\Inventory');
     }
 
     public function infected()
     {
         return $this->hasOne('App\Infected');
+    }
+
+    public function scopeRelations($query, $id)
+    {
+        return $query->with('inventory')->with('infected')
+                     ->whereId($id)->first();
     }
 }
