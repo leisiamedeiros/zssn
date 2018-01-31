@@ -300,8 +300,15 @@ class SurvivorController extends Controller
               }
 
             } else {
-              $itemChangeIn->survivor_id = $owner_id;
-              $itemChangeIn->save();
+              $ownerInventory = Inventory::whereSurvivorId($owner_id)->whereItemId($itemChangeIn->item_id)->first();
+              if (!empty($ownerInventory)) {
+                $ownerInventory->qtd += $itemChangeIn->qtd;
+                $ownerInventory->save();
+                $itemChangeIn->delete();
+              } else {
+                $itemChangeIn->survivor_id = $owner_id;
+                $itemChangeIn->save();
+              }
             }
         }
 
@@ -328,8 +335,15 @@ class SurvivorController extends Controller
               }
 
             } else {
-              $itemChangeOW->survivor_id = $interessed_id;
-              $itemChangeOW->save();
+              $InteressedInventory = Inventory::whereSurvivorId($interessed_id)->whereItemId($itemChangeOW->item_id)->first();
+              if (!empty($InteressedInventory)) {
+                  $InteressedInventory->qtd += $itemChangeOW->qtd;
+                  $InteressedInventory->save();
+                  $itemChangeOW->delete();
+              } else {
+                  $itemChangeOW->survivor_id = $interessed_id;
+                  $itemChangeOW->save();
+              }
             }
         }
 
