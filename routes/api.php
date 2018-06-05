@@ -16,3 +16,12 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::prefix('survivor')->group(function () {
+
+    Route::post('/new', 'SurvivorController@store');
+    Route::put('/{id}/location/update', 'SurvivorController@updateLocation');
+    Route::post('/{id}/report', 'SurvivorController@flagSurvivorInfected');
+    Route::post('/{id}/trade', 'SurvivorController@tradeItems');
+
+});
