@@ -25,3 +25,6 @@ Route::prefix('survivor')->group(function () {
     Route::post('/{id}/trade', 'SurvivorController@tradeItems');
 
 });
+
+Route::get('report/infected', 'ReportsController@survivorsInfecteds');
+Route::get('report/non-infected', 'ReportsController@survivorsNonInfected');
